@@ -14,8 +14,8 @@ type User struct {
 	Religion     string
 	Community    string
 	Gender       string
-	Email        string
-	MobileNumber int64
+	Email        string `gorm:"unique"`
+	MobileNumber int64  `gorm:"unique"`
 	Password     string
 	DOB          time.Time
 	Country      string

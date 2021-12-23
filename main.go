@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"os"
 	"rishte/database"
+	"rishte/handlers"
 	"rishte/migrations"
 	"rishte/models"
 	"rishte/repository"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm/logger"
 )
 
@@ -22,21 +25,32 @@ func main() {
 		logger.Default.Error(context.Background(), err.Error())
 	}
 
-	repositories := repository.InitRepositories(db)
-	modelUser := models.User{
-		FirstName:    "Himanshu",
-		LastName:     "Dhankhar",
+	repos := repository.InitRepositories(db)
+
+	testUser := models.User{
+		FirstName:    "himanshu",
+		LastName:     "dhankhar",
 		ProfileFor:   "self",
 		Religion:     "hindu",
-		Community:    "Indian",
+		Community:    "jat",
 		Gender:       "male",
 		Email:        "dhankhar7924@gmail.com",
 		MobileNumber: 9079161380,
 		Password:     "Dhankhar7924@",
-		DOB: time.Date(1997, time.January,
-			11, 21, 34, 01, 0, time.UTC),
-		Country: "India",
+		Country:      "India",
+		DOB: time.Date(1997, time.January, 10, 0,0,0,0, time.UTC),
 	}
-	repositories.UserRepo.CreateUser(modelUser)
+	repos.UserRepo.CreateUser(testUser)
 
+	port, exists := os.LookupEnv("PORT")
+	if !exists {
+		port = "3000"
+	}
+
+	handler := handlers.NewHandler(*repos)
+
+	router := gin.Default()
+	router.POST("/login", handler.Login)
+
+	router.Run(":" + port)
 }

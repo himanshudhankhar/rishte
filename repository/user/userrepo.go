@@ -19,15 +19,21 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 	}
 }
 
-func (repo *UserRepo) GetExistingUser(email string) models.User {
+func (repo *UserRepo) GetExistingUserByEmail(email string) models.User {
 	var user models.User
 	repo.db.Where("email = ?", email).First(&user)
 	return user
 }
 
+func (repo *UserRepo) GetExistingUserByPhone(phone string) models.User {
+	var user models.User
+	repo.db.Where("mobile_number = ?", phone).First(&user)
+	return user
+}
+
 func (repo *UserRepo) CreateUser(user models.User) (models.User, error) {
 
-	hashedPass, _ := hashPassword(user.Password)
+	hashedPass, _ := repo.hashPassword(user.Password)
 	user.Password = hashedPass
 
 	result := repo.db.Create(&user)
@@ -41,7 +47,7 @@ func (repo *UserRepo) CreateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func hashPassword(password string) (string, error) {
+func (repo *UserRepo) hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
