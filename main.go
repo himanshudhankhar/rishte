@@ -38,7 +38,7 @@ func main() {
 		MobileNumber: 9079161380,
 		Password:     "Dhankhar7924@",
 		Country:      "India",
-		DOB: time.Date(1997, time.January, 10, 0,0,0,0, time.UTC),
+		DOB:          time.Date(1997, time.January, 10, 0, 0, 0, 0, time.UTC),
 	}
 	repos.UserRepo.CreateUser(testUser)
 
@@ -51,6 +51,7 @@ func main() {
 
 	router := gin.Default()
 	router.POST("/login", handler.Login)
+	router.POST("/signup", handler.SignUp)
 
 	router.Run(":" + port)
 }
