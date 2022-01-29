@@ -106,16 +106,23 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
+	userFound := h.UserRepo.UserRepo.GetExistingUserByPhone(strconv.FormatInt(parsedUser.MobileNumber, 10))
+	if userFound.Email != "" {
+		logger.Default.Error(c.Request.Context(), "err received while creating user mobile number already in use")
+		c.JSON(409, gin.H{"success": false, "error": "MobileNumber already in use"})
+		return
+	}
+	logger.Default.Error(c.Request.Context(), "userfound", userFound)
 	user, err := h.UserRepo.UserRepo.CreateUser(parsedUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			logger.Default.Error(c.Request.Context(), "err received while creating user email already in use", err.Error())
 			c.JSON(409, gin.H{"success": false, "error": "Email already in use"})
 			return
-		}else {
-		logger.Default.Error(c.Request.Context(), "err received while creating user ", err.Error())
-		c.JSON(409, gin.H{"success": false, "error": "Error while creating User" + err.Error()})
-		return
+		} else {
+			logger.Default.Error(c.Request.Context(), "err received while creating user ", err.Error())
+			c.JSON(409, gin.H{"success": false, "error": "Error while creating User" + err.Error()})
+			return
 		}
 	}
 
