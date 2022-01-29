@@ -31,6 +31,42 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
+	if signup.LastName == "" {
+		logger.Default.Error(context.Background(), "err last name is empty")
+		c.JSON(400, gin.H{"success": false, "error": "last name cannot be empty"})
+		return
+	}
+
+	if signup.ProfileFor == "" {
+		logger.Default.Error(context.Background(), "err profile created for is empty")
+		c.JSON(400, gin.H{"success": false, "error": "profile created for cannot be empty"})
+		return
+	}
+
+	if signup.Community == "" {
+		logger.Default.Error(context.Background(), "err community is empty")
+		c.JSON(400, gin.H{"success": false, "error": "community cannot be empty"})
+		return
+	}
+
+	if signup.Country == "" {
+		logger.Default.Error(context.Background(), "err country is empty")
+		c.JSON(400, gin.H{"success": false, "error": "country cannot be empty"})
+		return
+	}
+
+	if signup.Religion == "" {
+		logger.Default.Error(context.Background(), "err religion is empty")
+		c.JSON(400, gin.H{"success": false, "error": "religion cannot be empty"})
+		return
+	}
+
+	if signup.Gender == "" {
+		logger.Default.Error(context.Background(), "err gender is empty")
+		c.JSON(400, gin.H{"success": false, "error": "gender cannot be empty"})
+		return
+	}
+
 	email, validMail := h.validMailAddress(signup.Email)
 	if email == "" || !validMail {
 		logger.Default.Error(context.Background(), "err email is not valid")
@@ -71,9 +107,16 @@ func (h Handler) SignUp(c *gin.Context) {
 	}
 
 	user, err := h.UserRepo.UserRepo.CreateUser(parsedUser)
-	if err != nil{
-	logger.Default.Error(c.Request.Context(), "err received while creating user ", err.Error())
-	c.JSON(409, gin.H{"success": false, "error": "Error while creating User"})
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			logger.Default.Error(c.Request.Context(), "err received while creating user email already in use", err.Error())
+			c.JSON(409, gin.H{"success": false, "error": "Email already in use"})
+			return
+		}else {
+		logger.Default.Error(c.Request.Context(), "err received while creating user ", err.Error())
+		c.JSON(409, gin.H{"success": false, "error": "Error while creating User" + err.Error()})
+		return
+		}
 	}
 
 	c.JSON(200, gin.H{"success": true, "error": "", "userID": user.ID})
